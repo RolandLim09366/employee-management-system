@@ -15,7 +15,7 @@ public class DepartmentService {
     private DepartmentRepo departmentRepo;
 
     // Create a new department
-    public Department createDepartment(Department department) {
+    public Department saveDepartment(Department department) {
         return departmentRepo.save(department);
     }
 
