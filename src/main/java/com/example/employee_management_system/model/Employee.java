@@ -6,13 +6,14 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "employee")
 @Getter
 @Setter
-public class Employee {
+public class Employee implements Serializable {
+    private static final long serialVersionUID = 1L;  // ✅ Add serialVersionUID
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

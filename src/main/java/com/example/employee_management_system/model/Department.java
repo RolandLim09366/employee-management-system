@@ -5,10 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Setter
-public class Department {
+public class Department implements Serializable {
+    private static final long serialVersionUID = 1L;  // ✅ Add serialVersionUID
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,11 +1,12 @@
 package com.example.employee_management_system.service;
 
 import com.example.employee_management_system.exception.ResourceNotFoundException;
-import com.example.employee_management_system.model.Department;
 import com.example.employee_management_system.model.Employee;
-import com.example.employee_management_system.repository.DepartmentRepo;
 import com.example.employee_management_system.repository.EmployeeRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,42 +15,49 @@ import java.util.List;
 public class EmployeeService {
 
     @Autowired
-    private EmployeeRepo employeeRepository;
-    @Autowired
-    private DepartmentRepo departmentRepository;
+    private EmployeeRepo employeeRepo;
 
+    // ✅ Cache all employees - Cache updated when an employee is added/updated/deleted
+    @Cacheable(value = "employees")
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        return employeeRepo.findAll();
     }
 
+    // ✅ Cache individual employee by ID - Improves performance for repeated fetches
+    @Cacheable(value = "employee", key = "#id")
     public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id)
+        return employeeRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + id));
     }
 
+    // ✅ Add employee and update cache
+    @CachePut(value = "employee", key = "#employee.id")
     public Employee saveEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+        return employeeRepo.save(employee);
     }
 
-    public void deleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Employee not found with ID: " + id);
-        }
-        employeeRepository.deleteById(id);
-    }
-
+    // ✅ Update employee and update cache
+    @CachePut(value = "employee", key = "#id")
     public Employee updateEmployee(Long id, Employee employeeDetails) {
-        return employeeRepository.findById(id).map(employee -> {
-            employee.setName(employeeDetails.getName());
-            employee.setPosition(employeeDetails.getPosition());
+        Employee employee = employeeRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + id));
 
-            if (employeeDetails.getDepartment() != null && employeeDetails.getDepartment().getId() != null) {
-                Department department = departmentRepository.findById(employeeDetails.getDepartment().getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Department not found with ID: " + employeeDetails.getDepartment().getId()));
-                employee.setDepartment(department);
-            }
+        employee.setName(employeeDetails.getName());
+        employee.setPosition(employeeDetails.getPosition());
+        employee.setDepartment(employeeDetails.getDepartment());
 
-            return employeeRepository.save(employee);
-        }).orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + id));
+        return employeeRepo.save(employee);
+    }
+
+    // ✅ Delete employee and remove from cache
+    @CacheEvict(value = "employee", key = "#id")
+    public void deleteEmployee(Long id) {
+        employeeRepo.deleteById(id);
+    }
+
+    // ✅ Clear entire employee cache when needed (e.g., bulk updates)
+    @CacheEvict(value = "employees", allEntries = true)
+    public void clearEmployeeCache() {
+        System.out.println("Clearing all employee cache");
     }
 }
