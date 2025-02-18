@@ -28,7 +28,7 @@ public class ProjectController {
 
     @PostMapping
     public Project addProject(@Valid @RequestBody Project project) {
-        return projectService.saveProject(project);
+        return projectService.createProject(project);
     }
 
     @DeleteMapping("/{id}")

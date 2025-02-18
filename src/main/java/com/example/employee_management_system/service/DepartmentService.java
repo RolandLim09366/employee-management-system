@@ -14,11 +14,6 @@ public class DepartmentService {
     @Autowired
     private DepartmentRepo departmentRepo;
 
-    // Create a new department
-    public Department saveDepartment(Department department) {
-        return departmentRepo.save(department);
-    }
-
     // Get all departments
     public List<Department> getAllDepartments() {
         return departmentRepo.findAll();
@@ -28,6 +23,11 @@ public class DepartmentService {
     public Department getDepartmentById(Long id) {
         return departmentRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found with ID: " + id));
+    }
+
+    // Create a new department
+    public Department createDepartment(Department department) {
+        return departmentRepo.save(department);
     }
 
     // Update department

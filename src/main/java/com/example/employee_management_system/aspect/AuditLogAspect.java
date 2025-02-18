@@ -40,7 +40,7 @@ public class AuditLogAspect {
         logAction("UPDATE", entity);
     }
 
-    @After("deleteEntity() && args(id)")
+    @AfterReturning("deleteEntity() && args(id)")
     public void logDelete(JoinPoint joinPoint, Long id) {
         String entityName = joinPoint.getTarget().getClass().getSimpleName().replace("Service", "");
         logAction("DELETE", entityName, id);

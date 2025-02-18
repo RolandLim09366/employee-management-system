@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.io.Serializable;
 
 @Entity
+@Table(name = "department")
 @Getter
 @Setter
 public class Department implements Serializable {

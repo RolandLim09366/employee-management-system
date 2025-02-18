@@ -1,6 +1,7 @@
 package com.example.employee_management_system.service;
 
 import com.example.employee_management_system.exception.ResourceNotFoundException;
+import com.example.employee_management_system.model.Employee;
 import com.example.employee_management_system.model.Project;
 import com.example.employee_management_system.repository.EmployeeRepo;
 import com.example.employee_management_system.repository.ProjectRepo;
@@ -8,13 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectService {
 
     @Autowired
     private ProjectRepo projectRepository;
+
     @Autowired
     private EmployeeRepo employeeRepository;
 
@@ -27,8 +30,26 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + id));
     }
 
-    public Project saveProject(Project project) {
+    public Project createProject(Project project) {
+        // Fetch full Employee details from DB before saving
+        Set<Employee> employees = fetchEmployeesById(project.getEmployees());
+
+        project.setEmployees(employees);
         return projectRepository.save(project);
+    }
+
+    public Project updateProject(Long projectId, Project projectDetails) {
+        return projectRepository.findById(projectId).map(project -> {
+            project.setName(projectDetails.getName());
+
+            if (projectDetails.getEmployees() != null) {
+                // Fetch full Employee details from DB before updating
+                Set<Employee> employees = fetchEmployeesById(projectDetails.getEmployees());
+                project.setEmployees(employees);
+            }
+
+            return projectRepository.save(project);
+        }).orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + projectId));
     }
 
     public void deleteProject(Long id) {
@@ -38,17 +59,10 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
 
-    public Project updateProject(Long projectId, Project projectDetails) {
-        return projectRepository.findById(projectId).map(project -> {
-            project.setName(projectDetails.getName());
-
-            if (projectDetails.getEmployees() != null) {
-                project.setEmployees(projectDetails.getEmployees());
-            }
-
-            return projectRepository.save(project);
-        }).orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + projectId));
+    private Set<Employee> fetchEmployeesById(Set<Employee> employeeSet) {
+        return employeeSet.stream()
+                .map(emp -> employeeRepository.findById(emp.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + emp.getId())))
+                .collect(Collectors.toSet());
     }
 }
-
-

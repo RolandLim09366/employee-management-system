@@ -2,6 +2,7 @@ package com.example.employee_management_system.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,6 @@ public class Employee implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    @NotBlank(message = "Department is required")
+    @NotNull(message = "Department is required")
     private Department department;
 }
-

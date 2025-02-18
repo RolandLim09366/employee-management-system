@@ -32,7 +32,7 @@ public class DepartmentController {
     // Create a new department
     @PostMapping
     public ResponseEntity<Department> createDepartment(@Valid @RequestBody Department department) {
-        Department savedDepartment = departmentService.saveDepartment(department);
+        Department savedDepartment = departmentService.createDepartment(department);
         return ResponseEntity.ok(savedDepartment);
     }
 
