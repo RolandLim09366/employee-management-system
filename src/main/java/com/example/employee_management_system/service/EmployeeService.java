@@ -24,9 +24,6 @@ public class EmployeeService {
     @Autowired
     private DepartmentRepo departmentRepo; // Inject DepartmentRepo
 
-    @Autowired
-    private CacheManager cacheManager;
-
     @Cacheable(value = "employees")
     public List<Employee> getAllEmployees() {
         return employeeRepo.findAll();
@@ -39,7 +36,6 @@ public class EmployeeService {
     }
 
     @CacheEvict(value = "employees", allEntries = true)  // Evict the entire employees list cache after saving
-    @CachePut(value = "employee", key = "#employee.id")
     public Employee createEmployee(Employee employee) {
         // Ensure department exists and fetch full entity
         Department department = departmentRepo.findById(employee.getDepartment().getId())
@@ -67,7 +63,7 @@ public class EmployeeService {
         return employeeRepo.save(employee);
     }
 
-    @CacheEvict(value = {"employees", "employee"}, allEntries = true, key = "#id") // Evict both list and individual employee cache
+    @CacheEvict(value = {"employees", "employee"}, allEntries = true)
     public void deleteEmployee(Long id) {
         if (!employeeRepo.existsById(id)) {
             throw new ResourceNotFoundException("Employee not found with ID: " + id);

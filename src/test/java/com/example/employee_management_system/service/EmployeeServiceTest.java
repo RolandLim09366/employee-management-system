@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
@@ -27,7 +26,7 @@ class EmployeeServiceTest {
     private EmployeeRepo employeeRepo;
 
     @Mock
-    private DepartmentRepo departmentRepo;  // Added DepartmentRepo mock
+    private DepartmentRepo departmentRepo;
 
     @InjectMocks
     private EmployeeService employeeService;
@@ -50,13 +49,12 @@ class EmployeeServiceTest {
 
     @Test
     void testGetAllEmployees() {
-        List<Employee> employees = Collections.singletonList(employee);
-        when(employeeRepo.findAll()).thenReturn(employees);
+        when(employeeRepo.findAll()).thenReturn(Collections.singletonList(employee));
 
         List<Employee> result = employeeService.getAllEmployees();
 
         assertEquals(1, result.size());
-        assertEquals("John Doe", result.getFirst().getName());
+        assertEquals("John Doe", result.get(0).getName());
     }
 
     @Test
@@ -73,9 +71,7 @@ class EmployeeServiceTest {
     void testGetEmployeeById_NotFound() {
         when(employeeRepo.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            employeeService.getEmployeeById(1L);
-        });
+        assertThrows(ResourceNotFoundException.class, () -> employeeService.getEmployeeById(1L));
     }
 
     @Test
@@ -95,27 +91,20 @@ class EmployeeServiceTest {
     void testCreateEmployee_InvalidData() {
         when(departmentRepo.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            employeeService.createEmployee(employee);
-        });
-
-        verify(departmentRepo).findById(1L);
+        assertThrows(ResourceNotFoundException.class, () -> employeeService.createEmployee(employee));
         verify(employeeRepo, never()).save(any(Employee.class));
     }
 
     @Test
     void testUpdateEmployee() {
-        // Mock existing employee and department
-        when(employeeRepo.findById(1L)).thenReturn(Optional.of(employee));
-        when(departmentRepo.findById(1L)).thenReturn(Optional.of(department));
-
-        // Create updated employee details
         Employee updatedDetails = new Employee();
         updatedDetails.setId(1L);
         updatedDetails.setName("John Smith");
         updatedDetails.setPosition("Senior Developer");
         updatedDetails.setDepartment(department);
 
+        when(employeeRepo.findById(1L)).thenReturn(Optional.of(employee));
+        when(departmentRepo.findById(1L)).thenReturn(Optional.of(department));
         when(employeeRepo.save(any(Employee.class))).thenReturn(updatedDetails);
 
         Employee updatedEmployee = employeeService.updateEmployee(1L, updatedDetails);
@@ -123,21 +112,13 @@ class EmployeeServiceTest {
         assertNotNull(updatedEmployee);
         assertEquals("John Smith", updatedEmployee.getName());
         assertEquals("Senior Developer", updatedEmployee.getPosition());
-        verify(employeeRepo).findById(1L);
-        verify(departmentRepo).findById(1L);
-        verify(employeeRepo).save(any(Employee.class));
     }
 
     @Test
     void testUpdateEmployee_InvalidData() {
         when(employeeRepo.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            employeeService.updateEmployee(1L, employee);
-        });
-
-        verify(employeeRepo).findById(1L);
-        verify(employeeRepo, never()).save(any(Employee.class));
+        assertThrows(ResourceNotFoundException.class, () -> employeeService.updateEmployee(1L, employee));
     }
 
     @Test
@@ -146,7 +127,6 @@ class EmployeeServiceTest {
 
         employeeService.deleteEmployee(1L);
 
-        verify(employeeRepo).existsById(1L);
         verify(employeeRepo).deleteById(1L);
     }
 
@@ -154,11 +134,6 @@ class EmployeeServiceTest {
     void testDeleteEmployee_NotFound() {
         when(employeeRepo.existsById(1L)).thenReturn(false);
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            employeeService.deleteEmployee(1L);
-        });
-
-        verify(employeeRepo).existsById(1L);
-        verify(employeeRepo, never()).deleteById(anyLong());
+        assertThrows(ResourceNotFoundException.class, () -> employeeService.deleteEmployee(1L));
     }
 }

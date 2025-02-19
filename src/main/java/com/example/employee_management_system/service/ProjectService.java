@@ -6,7 +6,11 @@ import com.example.employee_management_system.model.Project;
 import com.example.employee_management_system.repository.EmployeeRepo;
 import com.example.employee_management_system.repository.ProjectRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -26,8 +30,9 @@ public class ProjectService {
     }
 
     public Project getProjectById(Long id) {
-        return projectRepository.findById(id)
+        Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + id));
+        return project;
     }
 
     public Project createProject(Project project) {

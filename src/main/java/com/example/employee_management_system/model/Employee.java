@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.io.Serializable;
 
 @Entity
@@ -30,5 +29,4 @@ public class Employee implements Serializable {
     @ManyToOne
     @JoinColumn(name = "department_id")
     @NotNull(message = "Department is required")
-    private Department department;
-}
+    private Department department;}
